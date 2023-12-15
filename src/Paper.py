@@ -124,14 +124,14 @@ class Paper:
         return self.delimiter.join(self.references)
 
     def add_datapoint(self, paper_name, session_name, abstract):
-        self.papers_data['paper_name'].append(paper_name)  # Week number!
-        self.papers_data['paper_session'].append(session_name)  # Week number!
-        self.papers_data['abstract'].append(abstract)  # If supervision in person! (yes. no, canceled)
-        self.papers_data['paper_authors'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['paper_authors_institution'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['section_titles'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['sections'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['references'].append([])  # If supervision in person! (yes. no, canceled)
+        self.papers_data['paper_name'].append(paper_name)
+        self.papers_data['paper_session'].append(session_name)
+        self.papers_data['abstract'].append(abstract)
+        self.papers_data['paper_authors'].append([])
+        self.papers_data['paper_authors_institution'].append([])
+        self.papers_data['section_titles'].append([])
+        self.papers_data['sections'].append([])
+        self.papers_data['references'].append([])
 
         self.current_index = self.current_index + 1
 

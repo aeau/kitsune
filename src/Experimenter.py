@@ -232,8 +232,82 @@ class Experimenter:
         avg_count = float(total_count)/float(paper_count)
 
         print(avg_count)
-        print("\n \n")
+        print("Counting authors per paper \n \n")
 
+        print(len(counter))
+        print(np.average(counter))
+        print(np.std(counter))
+        print(np.percentile(counter, 2.5))
+        print(np.percentile(counter, 97.5))
+
+    def calculate_metrics_sections(self, column_name: str, avg = True, sd = True, file_name="paper_metrics.csv", save=True, append=True):
+
+        total_count = 0
+        paper_count = 0
+        counter = []
+        avg_count = 0
+        sd_count = 0
+
+        for paper_name, paper in self.papers.items():
+            paper_count += 1
+            total_count += len(paper.get_paper_section_titles_no_delimiter())
+            counter.append(len(paper.get_paper_section_titles_no_delimiter()))
+
+        counter = np.array(counter)
+
+        print("Counting sections \n \n")
+
+        print(len(counter))
+        print(np.average(counter))
+        print(np.std(counter))
+        print(np.percentile(counter, 2.5))
+        print(np.percentile(counter, 97.5))
+
+    def calculate_metrics_references(self, column_name: str, avg = True, sd = True, file_name="paper_metrics.csv", save=True, append=True):
+
+        total_count = 0
+        paper_count = 0
+        counter = []
+        avg_count = 0
+        sd_count = 0
+
+        for paper_name, paper in self.papers.items():
+            paper_count += 1
+            total_count += len(paper.get_paper_references_no_delimiter())
+            counter.append(len(paper.get_paper_references_no_delimiter()))
+
+        counter = np.array(counter)
+
+        print("Counting references \n \n")
+
+        print(len(counter))
+        print(np.average(counter))
+        print(np.std(counter))
+        print(np.percentile(counter, 2.5))
+        print(np.percentile(counter, 97.5))
+
+    def calculate_metrics_for_sessions(self, column_name: str, avg = True, sd = True, file_name="paper_metrics.csv", save=True, append=True):
+
+        total_count = 0
+        paper_count = 0
+        counter = []
+        avg_count = 0
+        sd_count = 0
+        session_count = {}
+
+        for paper_name, paper in self.papers.items():
+            paper_count += 1
+
+            if paper.get_paper_session() not in session_count:
+                session_count.update({paper.get_paper_session(): 1})
+            else:
+                session_count[paper.get_paper_session()] += 1
+
+        for session, count in session_count.items():
+            counter.append(count)
+
+        counter = np.array(counter)
+        print("Counting sessions \n \n")
         print(len(counter))
         print(np.average(counter))
         print(np.std(counter))
@@ -350,27 +424,33 @@ class Experimenter:
 
             for section in paper_sections:
 
-                # text = re.sub(r'[^a-zA-Z0-9.,;\s]', '', section)
-                # text = re.sub(r'[^a-zA-Z.,;\s]', '', section)
-                # text = re.sub(r'[^a-zA-Z.,;\s-]', '', section)
-
                 # Preprocess the text (remove non-alphanumeric characters, convert to lowercase)
-                text = re.sub(r'[^a-zA-Z.,;\s\n\[\]-]', '', section)
+                text = re.sub(r'[^a-zA-Z.,;?!:\s\n\[\]\d-]', '', section)
 
-                # Remove numbers within square brackets
+                # Remove everything inside square brackets
                 text = re.sub(r'\[.*?\]', '', text)
 
-                # Remove punctuation followed by other punctuation without spaces
-                text = re.sub(r'([.,;])\s*', r'\1', text)
+                text = re.sub(r'\[\s*\d+\s*(?:,\s*\d+\s*)*\]', '', text)
 
-                # Remove punctuation followed by other punctuation without spaces
-                text = re.sub(r'[.,;]+(?=[.,;])', '', text)
+                # Remove punctuation even if there is a space in between, excluding "-"
+                text = re.sub(r'([.,;])\s*(?<!\n)', r'\1', text)
+
+                # Replace consecutive spaces with a single space, excluding "\n"
+                # text = re.sub(r'(?<!\n)\s+', ' ', text)
+                # text = re.sub(r'(?<!\n)\s+(?!\n)', ' ', text)
+
+                # Remove spaces before punctuation, excluding "-"
+                # text = re.sub(r'\s*([.,;?!:])\s*', r'\1', text)
+                # text = re.sub(r'\s*([.,;?!:])', r'\1', text)
+                text = re.sub(r'\s*([.,;?!:])(?<!\n)', r'\1', text)
 
                 text = text.lower()
 
-                # Extract sentences based on ".", ",", ";"
-                # sentences = re.split(r'[.,;]', text)
-                sentences = re.split(r'[.,;\n]', text)
+                # Extract sentences based on ".", ",", ";", and "\n"
+                # sentences = re.split(r'[.,;\n]', text)
+
+                # Extract sentences based on ".", ",", ";", ":", "!", "?", and "\n"
+                sentences = re.split(r'[.,;?!:\n]', text)
 
                 # Remove leading and trailing whitespaces from each sentence
                 sentences = [sentence.strip() for sentence in sentences]
@@ -386,7 +466,7 @@ class Experimenter:
 
 
         # Display the top 5 n-grams by counts sorted!
-        print("Here we present all the sentences ocurrances in general in all papers and sections")
+        print(f"Here we present all the sentences ocurrances in general in all papers and sections with minimum_length {minimum_length}")
         total_sentences = sum(all_sentence_counts.values())
         for sentence, count in sorted(all_sentence_counts.items(), key=lambda x: x[1], reverse=True)[:top_k]:
             percentage = (count / total_sentences) * 100
@@ -404,21 +484,33 @@ class Experimenter:
 
             for section in paper_sections:
 
-                # text = re.sub(r'[^a-zA-Z0-9.,;\s]', '', section)
-                # text = re.sub(r'[^a-zA-Z.,;\s]', '', section)
-                text = re.sub(r'[^a-zA-Z.,;\s-]', '', section)
+                # Preprocess the text (remove non-alphanumeric characters, convert to lowercase)
+                text = re.sub(r'[^a-zA-Z.,;?!:\s\n\[\]\d-]', '', section)
 
-                # Remove punctuation followed by other punctuation without spaces
-                text = re.sub(r'([.,;])\s*', r'\1', text)
+                # Remove everything inside square brackets
+                text = re.sub(r'\[.*?\]', '', text)
 
-                # Remove punctuation followed by other punctuation without spaces
-                text = re.sub(r'[.,;]+(?=[.,;])', '', text)
+                text = re.sub(r'\[\s*\d+\s*(?:,\s*\d+\s*)*\]', '', text)
+
+                # Remove punctuation even if there is a space in between, excluding "-"
+                text = re.sub(r'([.,;])\s*(?<!\n)', r'\1', text)
+
+                # Replace consecutive spaces with a single space, excluding "\n"
+                # text = re.sub(r'(?<!\n)\s+', ' ', text)
+                # text = re.sub(r'(?<!\n)\s+(?!\n)', ' ', text)
+
+                # Remove spaces before punctuation, excluding "-"
+                # text = re.sub(r'\s*([.,;?!:])\s*', r'\1', text)
+                # text = re.sub(r'\s*([.,;?!:])', r'\1', text)
+                text = re.sub(r'\s*([.,;?!:])(?<!\n)', r'\1', text)
 
                 text = text.lower()
 
-                # Extract sentences based on ".", ",", ";"
-                # sentences = re.split(r'[.,;]', text)
-                sentences = re.split(r'[.,;\n]', text)
+                # Extract sentences based on ".", ",", ";", and "\n"
+                # sentences = re.split(r'[.,;\n]', text)
+
+                # Extract sentences based on ".", ",", ";", ":", "!", "?", and "\n"
+                sentences = re.split(r'[.,;?!:\n]', text)
 
                 # Remove leading and trailing whitespaces from each sentence
                 sentences = [sentence.strip() for sentence in sentences]
@@ -438,13 +530,91 @@ class Experimenter:
 
 
         # Display the top 5 n-grams by counts sorted!
-        print("Here we present all sentences ocurrances in papers")
+        print(f"Here we present all sentences ocurrances in papers with minimum_length {minimum_length}")
         total_sentences = len(self.papers)
         for sentence, count in sorted(all_sentence_counts.items(), key=lambda x: x[1], reverse=True)[:top_k]:
             percentage = (count / total_sentences) * 100
             print(f"{sentence}: {count} occurrences ({percentage:.2f}% of total)")
 
         print("\n")
+
+    def search_sentences_per_paper(self, sentences_to_search: [], all_ngrams_until=True, minimum_length=1, top_k=5, avg=True,
+                                    sd=True, file_name="paper_metrics.csv", save=True, append=True):
+
+        # all_sentence_counts = Counter()
+
+        all_sentence_counts = {x: Counter() for x in sentences_to_search}
+
+        for paper_name, paper in self.papers.items():
+            paper_sections = paper.get_paper_sections_no_delimiter()
+            seen_sentence = {x: set() for x in sentences_to_search}
+
+            for section in paper_sections:
+
+                # Preprocess the text (remove non-alphanumeric characters, convert to lowercase)
+                text = re.sub(r'[^a-zA-Z.,;?!:\s\n\[\]\d-]', '', section)
+
+                # Remove everything inside square brackets
+                text = re.sub(r'\[.*?\]', '', text)
+
+                text = re.sub(r'\[\s*\d+\s*(?:,\s*\d+\s*)*\]', '', text)
+
+                # Remove punctuation even if there is a space in between, excluding "-"
+                text = re.sub(r'([.,;])\s*(?<!\n)', r'\1', text)
+
+                # Replace consecutive spaces with a single space, excluding "\n"
+                # text = re.sub(r'(?<!\n)\s+', ' ', text)
+                # text = re.sub(r'(?<!\n)\s+(?!\n)', ' ', text)
+
+                # Remove spaces before punctuation, excluding "-"
+                # text = re.sub(r'\s*([.,;?!:])\s*', r'\1', text)
+                # text = re.sub(r'\s*([.,;?!:])', r'\1', text)
+                text = re.sub(r'\s*([.,;?!:])(?<!\n)', r'\1', text)
+
+                text = text.lower()
+
+                # Extract sentences based on ".", ",", ";", and "\n"
+                # sentences = re.split(r'[.,;\n]', text)
+
+                # Extract sentences based on ".", ",", ";", ":", "!", "?", and "\n"
+                sentences = re.split(r'[.,;?!:\n]', text)
+
+                # Remove leading and trailing whitespaces from each sentence
+                sentences = [sentence.strip() for sentence in sentences]
+
+                for sentence_to_search in sentences_to_search:
+                    # Filter out sentences that do not contain the specified substring
+                    sentences_searched = [sentence for sentence in sentences if sentence_to_search.lower() in sentence.lower()]
+
+                    # Filter out sentences that are either one word or empty space
+                    sentences_searched = [sentence for sentence in sentences_searched if len(sentence.split()) > minimum_length]
+
+                    # Count each unique sentence
+                    sentence_counts = Counter(sentences_searched)
+
+                    for sentence_count in sentence_counts:
+                        # Count only if the n-gram hasn't been seen in this text before
+                        if sentence_count not in seen_sentence[sentence_to_search]:
+                            all_sentence_counts[sentence_to_search][sentence_count] += 1
+                            # all_ngram_counts[ngram] += 1
+                            seen_sentence[sentence_to_search].add(sentence_count)
+
+        # Display the top 5 n-grams by counts sorted!
+        print("Here we present all sentences occurrences in papers")
+        total_sentences = len(self.papers)
+
+        for key, all_sentence_per_word in all_sentence_counts.items():
+            print(f"Here we present all sentences occurrences in papers when using search string: '{key}' with minimum length {minimum_length}")
+            sum_count = 0
+            for sentence, count in sorted(all_sentence_per_word.items(), key=lambda x: x[1], reverse=True)[:top_k]:
+                percentage = (count / total_sentences) * 100
+                print(f"{sentence}: {count} occurrences ({percentage:.2f}% of total)")
+                sum_count += count
+
+            percentage = (sum_count / total_sentences) * 100
+            print(f"\n the sum of ocurrences is {sum_count} out of {total_sentences}. This means ({percentage:.2f}% of total)")
+
+            print("\n")
 
     def remove_punctuation(self, input_string):
         # Make a regular expression that matches all punctuation
@@ -475,7 +645,7 @@ class Experimenter:
 
         return total_occurrences
 
-    def create_limited_dataset_text_references(self, input_type: DatasetInputType, token_limit=512, section_token_limit=400):
+    def create_limited_dataset_text_references(self, input_type, token_limit=512, section_token_limit=400):
         dataset_llm = DatasetLLMPapers()
 
         for paper_name, paper in self.papers.items():
@@ -495,7 +665,8 @@ class Experimenter:
         df = pd.DataFrame(dataset_llm.get_data(),
                           columns=dataset_llm.get_data().keys())
         # df.to_excel("output.xlsx")
-        df.to_excel(self.papers_directory + "/chi-2023-data-no-references.xlsx")
+        df.to_excel(self.papers_directory + "/chi-2023-data-no-references-2048-parts.xlsx")
+        # df.to_excel(self.papers_directory + "/chi-2023-data-no-references.xlsx") # Next test
 
 
     def papers_to_compressed_view(self):

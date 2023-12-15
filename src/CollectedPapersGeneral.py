@@ -7,25 +7,24 @@ class CollectedPapersGeneral:
         self.dataset_name = dataset_name
         self.max_number_sections = max_number_sections
         self.papers_data = {}
-        self.papers_data.update({'paper_name': []})  # Week number!
-        self.papers_data.update({'paper_session': []})  # Week number!
-        self.papers_data.update({'paper_authors': []})  # If supervision in person! (yes. no, canceled)
-        self.papers_data.update({'paper_authors_institution': []})  # Motivated data (1-10)
-        self.papers_data.update({'abstract': []})  # work done by student/team (1-10)
-        self.papers_data.update({'section_titles': []})  # work done by student/team (1-10)
+        self.papers_data.update({'paper_name': []})
+        self.papers_data.update({'paper_session': []})
+        self.papers_data.update({'paper_authors': []})
+        self.papers_data.update({'paper_authors_institution': []})
+        self.papers_data.update({'abstract': []})
+        self.papers_data.update({'section_titles': []})
 
         for i in range(0, max_number_sections):
-            self.papers_data.update({"section" + str(i): []})  # Week number!
+            self.papers_data.update({"section" + str(i): []})
 
-        # self.papers_data.update({'sections': []})  # work done by student/team (1-10)
-        self.papers_data.update({'references': []})  # Session generated new ideas? (1-10)
+        self.papers_data.update({'references': []})
 
         self.current_index = -1
 
     def create_as_many_columns_as_sections(self, max_number_sections):
 
         for i in range(0, max_number_sections):
-            self.papers_data.update({"section" + str(self.internal_index): []})  # Week number!
+            self.papers_data.update({"section" + str(self.internal_index): []})
 
     def add_sections(self, section_list: []):
 
@@ -36,26 +35,24 @@ class CollectedPapersGeneral:
                 self.papers_data["section" + str(i)].append(str(section_list[i]))
 
     def add_datapoint(self, paper_name, session_name, abstract):
-        self.papers_data['paper_name'].append(paper_name)  # Week number!
-        self.papers_data['paper_session'].append(session_name)  # Week number!
-        self.papers_data['abstract'].append(abstract)  # If supervision in person! (yes. no, canceled)
-        self.papers_data['paper_authors'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['paper_authors_institution'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['section_titles'].append([])  # If supervision in person! (yes. no, canceled)
-        # self.papers_data['sections'].append([])  # If supervision in person! (yes. no, canceled)
-        self.papers_data['references'].append([])  # If supervision in person! (yes. no, canceled)
+        self.papers_data['paper_name'].append(paper_name)
+        self.papers_data['paper_session'].append(session_name)
+        self.papers_data['abstract'].append(abstract)
+        self.papers_data['paper_authors'].append([])
+        self.papers_data['paper_authors_institution'].append([])
+        self.papers_data['section_titles'].append([])
+        self.papers_data['references'].append([])
 
         self.current_index = self.current_index + 1
 
     def add_full_datapoint(self, paper_name, session_name, abstract, authors, full_authors, section_titles, references): #, sections, references):
-        self.papers_data['paper_name'].append(paper_name)  # Week number!
-        self.papers_data['paper_session'].append(session_name)  # Week number!
-        self.papers_data['abstract'].append(abstract)  # If supervision in person! (yes. no, canceled)
-        self.papers_data['paper_authors'].append(authors)  # If supervision in person! (yes. no, canceled)
-        self.papers_data['paper_authors_institution'].append(full_authors)  # If supervision in person! (yes. no, canceled)
-        self.papers_data['section_titles'].append(section_titles)  # If supervision in person! (yes. no, canceled)
-        # self.papers_data['sections'].append(sections)  # If supervision in person! (yes. no, canceled)
-        self.papers_data['references'].append(references)  # If supervision in person! (yes. no, canceled)
+        self.papers_data['paper_name'].append(paper_name)
+        self.papers_data['paper_session'].append(session_name)
+        self.papers_data['abstract'].append(abstract)
+        self.papers_data['paper_authors'].append(authors)
+        self.papers_data['paper_authors_institution'].append(full_authors)
+        self.papers_data['section_titles'].append(section_titles)
+        self.papers_data['references'].append(references)
 
     def update_datapoint(self, data_column, data):
         self.papers_data[data_column][self.current_index].append(data)
